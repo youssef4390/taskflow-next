@@ -1,28 +1,50 @@
-// app/projects/[id]/page.tsx
-interface Project { id: string; name: string; color: string; }
-interface Props {
- params: Promise<{ id: string }>;
+import Link from 'next/link';
+import { headers } from 'next/headers';
+import type { Project } from '../../lib/db';
+
+interface ProjectPageProps {
+  params: Promise<{ id: string }>;
 }
-export default async function ProjectPage({ params }: Props) {
- const { id } = await params;
- const res = await fetch(`http://localhost:4000/projects/${id}`, {
- cache: 'no-store'
- });
- if (!res.ok) {
- return <div style={{ padding: '2rem' }}>Projet non trouvé</div>;
- }
- const project: Project = await res.json();
- return (
- <div style={{ padding: '2rem' }}>
- <h1>
- <span style={{
- display: 'inline-block', width: 16, height: 16,
- borderRadius: '50%', background: project.color, marginRight: 8
- }} />
- {project.name}
- </h1>
- <p>ID : {project.id}</p>
- <a href="/dashboard">← Retour au Dashboard</a>
- </div>
- );
+
+async function getProject(id: string) {
+  const headersList = await headers();
+  const host = headersList.get('host') || 'localhost:3000';
+  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+  const res = await fetch(`${protocol}://${host}/api/projects/${id}`, { cache: 'no-store' });
+
+  if (!res.ok) {
+    return null;
+  }
+
+  return (await res.json()) as Project;
+}
+
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  const { id } = await params;
+  const project = await getProject(id);
+
+  if (!project) {
+    return (
+      <div className="page-shell">
+        <section className="page-card project-card">Projet non trouvé</section>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page-shell">
+      <section className="page-card project-card">
+        <h1 className="page-title">
+          <span className="project-dot" style={{ display: 'inline-block', background: project.color }} />
+          {project.name}
+        </h1>
+        <p className="project-meta">ID : {project.id}</p>
+        <div>
+          <Link href="/dashboard" className="button button-secondary">
+            Retour au Dashboard
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
 }

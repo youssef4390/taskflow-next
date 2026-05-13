@@ -1,31 +1,45 @@
-// app/layout.tsx
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { getCurrentUser, logout } from './actions/auth';
 import './globals.css';
+
 export const metadata: Metadata = {
- title: 'TaskFlow',
- description: 'Gestion de projets collaboratifs',
+  title: 'TaskFlow',
+  description: 'Gestion de projets collaboratifs',
 };
-export default function RootLayout({
- children,
-}: {
- children: React.ReactNode;
-}) {
- return (
- <html lang="fr">
- <body>
- <header style={{
- background: '#1B8C3E', color: 'white',
- padding: '1rem 2rem', display: 'flex',
- justifyContent: 'space-between', alignItems: 'center'
- }}>
- <h2 style={{ margin: 0, fontWeight: 700 }}>TaskFlow</h2>
- <nav style={{ display: 'flex', gap: '1rem' }}>
- <a href="/dashboard" style={{ color: 'white' }}>Dashboard</a>
- <a href="/login" style={{ color: 'white' }}>Login</a>
- </nav>
- </header>
- <main>{children}</main>
- </body>
- </html>
- );
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const user = await getCurrentUser();
+
+  return (
+    <html lang="fr">
+      <body>
+        <header className="app-header">
+          <Link href="/" className="brand">
+            <h2 className="brand-title">TaskFlow</h2>
+          </Link>
+          <nav className="nav">
+            <Link href="/dashboard">Dashboard</Link>
+            {user ? (
+              <>
+                <span className="nav-user">{user.email}</span>
+                <form action={logout}>
+                  <button type="submit" className="button button-secondary button-header">
+                    Logout
+                  </button>
+                </form>
+              </>
+            ) : (
+              <Link href="/login">Login</Link>
+            )}
+          </nav>
+        </header>
+        <main>{children}</main>
+      </body>
+    </html>
+  );
 }

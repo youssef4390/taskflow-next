@@ -1,51 +1,41 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { headers } from 'next/headers';
-
-async function getApiUrl() {
-  const headersList = await headers();
-  const host = headersList.get('host') || 'localhost:3000';
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-
-  return `${protocol}://${host}`;
-}
+import { prisma } from '@/lib/prisma';
 
 export async function addProject(formData: FormData) {
-  const name = formData.get('name') as string;
-  const color = formData.get('color') as string;
-  const apiUrl = await getApiUrl();
+  const name = String(formData.get('name') || '').trim();
+  const color = String(formData.get('color') || '#3498db');
 
-  await fetch(`${apiUrl}/api/projects`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, color }),
-  });
+  if (!name) return;
+
+  await prisma.project.create({ data: { name, color } });
 
   revalidatePath('/dashboard');
 }
 
 export async function renameProject(formData: FormData) {
-  const id = formData.get('id') as string;
-  const newName = formData.get('newName') as string;
-  const color = formData.get('color') as string;
-  const apiUrl = await getApiUrl();
+  const id = Number(formData.get('id'));
+  const newName = String(formData.get('newName') || '').trim();
+  const color = String(formData.get('color') || '#3498db');
 
-  await fetch(`${apiUrl}/api/projects/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: newName, color }),
+  if (!id || !newName) return;
+
+  await prisma.project.update({
+    where: { id },
+    data: { name: newName, color },
   });
 
   revalidatePath('/dashboard');
 }
 
 export async function deleteProject(formData: FormData) {
-  const id = formData.get('id') as string;
-  const apiUrl = await getApiUrl();
+  const id = Number(formData.get('id'));
 
-  await fetch(`${apiUrl}/api/projects/${id}`, {
-    method: 'DELETE',
+  if (!id) return;
+
+  await prisma.project.delete({
+    where: { id },
   });
 
   revalidatePath('/dashboard');

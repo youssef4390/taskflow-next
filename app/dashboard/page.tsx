@@ -1,31 +1,19 @@
 import Link from 'next/link';
-import { headers } from 'next/headers';
+import { prisma } from '@/lib/prisma';
 import AddProjectForm from './AddProjectForm';
 import { deleteProject, renameProject } from '../actions/projects';
-import type { Project } from '../lib/db';
-
-async function getProjects() {
-  const headersList = await headers();
-  const host = headersList.get('host') || 'localhost:3000';
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-  const res = await fetch(`${protocol}://${host}/api/projects`, { cache: 'no-store' });
-
-  if (!res.ok) {
-    return [];
-  }
-
-  return (await res.json()) as Project[];
-}
 
 export default async function DashboardPage() {
-  const projects = await getProjects();
+  const projects = await prisma.project.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
 
   return (
     <div className="page-shell">
       <section className="page-card">
         <h1 className="page-title">Dashboard</h1>
         <p className="page-subtitle">
-          Gérez vos projets, leurs couleurs et leurs noms depuis un seul endroit.
+          {projects.length} projet{projects.length > 1 ? 's' : ''}. Gerez leurs couleurs et leurs noms depuis un seul endroit.
         </p>
 
         <AddProjectForm />

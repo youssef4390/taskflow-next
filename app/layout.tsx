@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Inter } from 'next/font/google';
 import { getCurrentUser, logout } from './actions/auth';
 import './globals.css';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'TaskFlow',
@@ -17,7 +20,7 @@ export default async function RootLayout({
 
   return (
     <html lang="fr">
-      <body>
+      <body className={inter.className}>
         <header className="app-header">
           <Link href="/" className="brand">
             <h2 className="brand-title">TaskFlow</h2>

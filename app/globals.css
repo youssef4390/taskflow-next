@@ -212,9 +212,27 @@ input:focus {
 
 .home-card,
 .auth-card,
-.project-card {
+.project-card,
+.not-found-card {
   max-width: 520px;
   margin: 0 auto;
+}
+
+.not-found-card {
+  text-align: center;
+}
+
+.not-found-title {
+  margin: 0;
+  color: #98a2b3;
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.not-found-image {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
 }
 
 .project-card .page-title {

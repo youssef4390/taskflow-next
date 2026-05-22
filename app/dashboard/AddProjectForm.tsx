@@ -8,7 +8,7 @@ function SubmitButton() {
 
   return (
     <button type="submit" disabled={pending} className="button">
-      {pending ? 'Création...' : '+ Nouveau projet'}
+      {pending ? 'Creation...' : '+ Nouveau projet'}
     </button>
   );
 }

@@ -23,7 +23,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             name="email"
             placeholder="Email"
             required
-            defaultValue="user@example.com"
+            defaultValue="admin@taskflow.com"
           />
           <input
             type="password"

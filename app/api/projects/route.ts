@@ -1,29 +1,26 @@
 import { NextResponse } from 'next/server';
-import { readDB, writeDB } from '../../lib/db';
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
-  const db = readDB();
-  return NextResponse.json(db.projects);
+  const projects = await prisma.project.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return NextResponse.json(projects);
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const name = String(body.name || '').trim();
-  const color = String(body.color || '#3498db');
+  const { name, color } = await request.json();
+  const projectName = String(name || '').trim();
+  const projectColor = String(color || '#3498db');
 
-  if (!name) {
+  if (!projectName) {
     return NextResponse.json({ error: 'Le nom du projet est obligatoire' }, { status: 400 });
   }
 
-  const db = readDB();
-  const newProject = {
-    id: String(Date.now()),
-    name,
-    color,
-  };
+  const project = await prisma.project.create({
+    data: { name: projectName, color: projectColor },
+  });
 
-  db.projects.push(newProject);
-  writeDB(db);
-
-  return NextResponse.json(newProject, { status: 201 });
+  return NextResponse.json(project, { status: 201 });
 }

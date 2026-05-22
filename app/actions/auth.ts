@@ -1,16 +1,17 @@
 'use server';
 
+import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { readDB } from '../lib/db';
 
 const AUTH_COOKIE = 'taskflow_user';
 
 export async function login(formData: FormData) {
   const email = String(formData.get('email') || '').trim().toLowerCase();
   const password = String(formData.get('password') || '');
-  const db = readDB();
-  const user = db.users.find((item) => item.email.toLowerCase() === email);
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
 
   if (!user || user.password !== password) {
     redirect('/login?error=invalid');
@@ -41,8 +42,9 @@ export async function getCurrentUser() {
     return null;
   }
 
-  const db = readDB();
-  const user = db.users.find((item) => item.email === email);
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
 
-  return user ? { id: user.id, email: user.email } : null;
+  return user ? { id: user.id, email: user.email, name: user.name } : null;
 }
